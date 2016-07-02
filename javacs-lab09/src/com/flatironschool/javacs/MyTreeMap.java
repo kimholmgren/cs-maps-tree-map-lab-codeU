@@ -10,6 +10,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
+import java.util.Queue;
 
 /**
  * Implementation of a Map using a binary search tree.
@@ -73,6 +74,17 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 		
 		// the actual search
         // TODO: Fill this in.
+			Node curr = root;
+			while(curr!=null) {
+				int cmp = k.compareTo(curr.key);
+				if(cmp==0) {
+					return curr; 
+				} else if(cmp < 0) {
+					curr = curr.left;
+				} else {
+					curr = curr.right;
+				}
+			}
         return null;
 	}
 
@@ -92,6 +104,24 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 
 	@Override
 	public boolean containsValue(Object target) {
+		Queue<Node> nodes = new LinkedList<Node>();
+		if(root==null) {
+			return false;
+		}
+		nodes.add(root);
+		while(!nodes.isEmpty()) {
+			Node curr = nodes.poll();
+			if(equals(curr.value, target)) {
+				return true;
+			}
+
+			if(curr.left!=null) {
+				nodes.add(curr.left);
+			}
+			if(curr.right!=null) {
+				nodes.add(curr.right);
+			}
+		}
 		return false;
 	}
 
@@ -118,7 +148,18 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 	public Set<K> keySet() {
 		Set<K> set = new LinkedHashSet<K>();
         // TODO: Fill this in.
-		return set;
+		return keySetHelper(root, set);
+	}
+
+	public Set<K> keySetHelper(Node node, Set<K> currset) {
+		if(node==null) {
+			return currset;
+		} else {
+			currset = keySetHelper(node.left, currset);
+			currset.add(node.key);
+			return keySetHelper(node.right, currset);
+
+		}
 	}
 
 	@Override
@@ -136,7 +177,32 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 
 	private V putHelper(Node node, K key, V value) {
         // TODO: Fill this in.
-        return null;
+		Comparable<? super K> currkey = (Comparable<? super K>) node.key;
+		int cmp = currkey.compareTo(key);
+		if(cmp==0) {
+			V oldval = node.value;
+			node.value = value;
+			return oldval;
+		} else if(cmp>0) {
+			if(node.left==null) {
+				node.left = new Node(key, value);
+				size++;
+				return null;
+			} else {
+				return putHelper(node.left, key, value);
+			}
+		} else {
+			if(node.right==null) {
+				node.right = new Node(key, value);
+				size++;
+				return null;
+			} else {
+				return putHelper(node.right, key, value);
+			}
+
+		}
+		//if the key is already in the tree, replace it and return old value
+		//if key is not in tree, creates node and returns null
 	}
 
 	@Override
